@@ -1,0 +1,30 @@
+clc; clear; 
+%% apartado a
+rE = 6371; %km
+mu = 3.986e5; %km^3/s^2
+
+r1 = [-735761; 506988; -540928]; %[km]
+v1 = [25.3451; 62.8133; 29.5876]; %[km/s]
+rS = rE; %km (radius satellite being the person the satellite, who is at sea level)
+phi = 40*pi/180; %rad (latitude)
+t = 4.5*3600; %sideral hours [s]
+
+[r0,v0] = SEZ2ECI(r1,v1,rS,phi,t);
+
+%% function 
+function [r0,v0] = SEZ2ECI(r1,v1,rS,phi,t)
+w = 72.921e-6; %[rad/s] Earth rotation
+w10 = [0,0,w]';
+%definition of the "satellite position vector"
+r1s = rS*[cos(phi);0;sin(phi)]; 
+%SEZ to ECEF
+v1 = BasisSEZ2ECEF(v1,0,phi); 
+r1 = BasisSEZ2ECEF(r1,0,phi); 
+%ECEF to ECI
+v1 = BasisECEF2ECI(v1,t,w);
+r1 = BasisECEF2ECI(r1,t,w);
+r1s = BasisECEF2ECI(r1s,t,w);
+%final results
+r0 = r1 + r1s;
+v0 = v1 + cross(w10,r0);
+end 
